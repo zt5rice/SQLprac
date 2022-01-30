@@ -304,6 +304,7 @@ HAVING COUNT(s_score)>=2;
 /*
 4.3.复杂查询
 16.查询所有课程成绩小于60分学生的学号、姓名
+第一种做法：将学号分组 在每个学号组 找成绩最高值<60的学号
 */
 select score.s_id, student.s_name
 from score
