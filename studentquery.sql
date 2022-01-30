@@ -319,3 +319,50 @@ INNER JOIN student
 ON score.s_id = student.s_id
 GROUP BY s_id
 HAVING MAX(s_score) <60
+
+/*
+二种解法：
+step1: 查询出学生课程数的统计量
+step2: 查询出学生课程成绩<60分对应课程数的统计量
+*/
+SELECT A.s_id,S.s_name
+FROM
+
+(SELECT s_id,COUNT(c_id) AS cnt
+FROM score
+GROUP BY score.s_id) AS A
+
+INNER JOIN
+
+(SELECT s_id,COUNT(c_id) AS cnt
+FROM score
+WHERE s_score<60
+GROUP BY s_id) AS B
+
+ON A.s_id = B.s_id
+
+INNER JOIN student AS S
+ON A.s_id = S.s_id
+
+WHERE A.cnt = B.cnt
+
+/*
+17、查询没有学全所有课的学生的学号、姓名
+*/
+-- 第一种解法：
+-- 首先学号分组  做having条件：每个学号统计出不同课程数量  小于 课程表中不同课程数量
+-- 上面结果为没有学全所有课程的学号
+-- 然后在学生表中  WHERE s_id IN ()条件  查找出学号、姓名。（这一步也可以用 INNER JOIN ON。）
+
+SELECT s_id,s_name FROM student
+WHERE s_id IN
+(
+SELECT s_id
+FROM score
+GROUP BY s_id
+HAVING COUNT(DISTINCT c_id) < (SELECT COUNT(DISTINCT c_id) FROM course)
+)
+
+
+-- 这种解法后来发现score表会存在一些学生没有成绩。比如说王菊同学一门课程成绩都不存在。
+-- 但是上述做法没有把王菊同学查找出来。
